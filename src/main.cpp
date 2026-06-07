@@ -25,28 +25,63 @@
 #include "./mesh/subdivision/polymorhic.hpp"
 #include "./mesh/subdivision/butterfly.hpp"
 #include "./mesh/subdivision/butterfly_tensor.hpp"
+#include "./mesh/subdivision/catmull-clark.hpp"
 #include "./mesh/subdivision/doo.hpp"
 
 int main(
 	[[maybe_unused]] int argc,
 	[[maybe_unused]] char* argv[]
 ) {
-	// Load mesh into half-data, with twin edge validation
+	// Load mesh into half-data, with twin edge validation.
 	// Triangle polygons
-	// std::unique_ptr<Mesh::HalfEdge> const p_mesh
-	// 	= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
+	std::unique_ptr<Mesh::HalfEdge> p_mesh
+		= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
 	// Quad polygons
-	std::unique_ptr<Mesh::HalfEdge> const p_mesh
-		= Mesh::Import( "cube.obj", Mesh::FileType::Wavefront, true );
+	// std::unique_ptr<Mesh::HalfEdge> p_mesh
+	// 	= Mesh::Import( "cube.obj", Mesh::FileType::Wavefront, true );
 
 	if ( !p_mesh ) {
 		std::cout << "Failed to import half edge data.\n";
 		return EXIT_FAILURE;
 	}
 
-	// Create Doo subdivision algorithm, with optional value of 0.6
 	std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
-		= std::make_unique<Mesh::Subdivision::Doo>( 0.6 );
+		= std::make_unique<Mesh::Subdivision::Butterfly>();
+	// Create Doo subdivision algorithm, with optional value of 0.6
+	// std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
+	// 	= std::make_unique<Mesh::Subdivision::Doo>( 0.6 );
+	// std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
+	// 	= std::make_unique<Mesh::Subdivision::CatmullClark>();
+
+	// Note:
+	// Not all file formats support import of smooth shading of polygons
+
+	// If polygon is set to flat shading, set its edges to sharp.
+	// for ( auto& p : p_mesh->polygon )
+	// 	if ( !p->f_smooth ) {
+	// 		for ( auto& e : p->edge ) {
+	// 			e->f_sharp = true;
+	// 			// Twin is also sharp.
+	// 			if ( e->twin )
+	// 				e->twin->f_sharp = true;
+	// 		}
+	// 	}
+
+	// Set sharp edge between smooth and flat shaded polygons.
+	// for ( auto& p : p_mesh->polygon ) {
+	// 	// State of this polygon.
+	// 	bool const f_smooth = p->f_smooth;
+	// 	for ( auto& e : p->edge ) {
+	// 		// If edge has a neighbor.
+	// 		if ( e->twin ) {
+	// 			// If smooth states are different, mark as sharp edge.
+	// 			if ( f_smooth != e->twin->polygon->f_smooth ) {
+	// 				e->f_sharp = true;
+	// 				e->twin->f_sharp = true;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	// Perform three subdivisions
 	auto p_subdiv = p_algorithm->process( p_mesh );
@@ -60,8 +95,8 @@ int main(
 
 	// Set all polygons to smooth shading,
 	// since the Doo algorithm does not support it.
-	for ( auto& p : p_subdiv->polygon )
-		p->f_smooth = true;
+	// for ( auto& p : p_subdiv->polygon )
+	// 	p->f_smooth = true;
 
 	// Save half-data as Wavefront data, with weighted vertex normals
 	if ( !Mesh::Export( "mesh-subdiv.obj", p_subdiv, Mesh::FileType::Wavefront, Mesh::VertexNormal::Weighted ) ) {

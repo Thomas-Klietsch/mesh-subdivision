@@ -65,17 +65,17 @@ namespace Mesh::Subdivision {
 			// Process polygons
 			for ( auto const& poly : p_input->polygon ) {
 				// Current polygon vertices
-				auto const v1 = mesh->add_vertex( poly->edge[0]->vertex->location, poly->edge[0]->vertex->is_boundary() );
-				auto const v2 = mesh->add_vertex( poly->edge[1]->vertex->location, poly->edge[1]->vertex->is_boundary() );
-				auto const v3 = mesh->add_vertex( poly->edge[2]->vertex->location, poly->edge[2]->vertex->is_boundary() );
+				auto const v1 = mesh->add_vertex( poly->edge[0]->vertex->location );
+				auto const v2 = mesh->add_vertex( poly->edge[1]->vertex->location );
+				auto const v3 = mesh->add_vertex( poly->edge[2]->vertex->location );
 				// Edge boundary state
 				bool const f_edge1 = poly->edge[0]->is_boundary(); // v1->v2
 				bool const f_edge2 = poly->edge[1]->is_boundary();
 				bool const f_edge3 = poly->edge[2]->is_boundary();
 				// Generate new edge vertices
-				auto const edge_v1 = mesh->add_vertex( CalculateEdgePoint( poly->edge[0] ), f_edge1 );
-				auto const edge_v2 = mesh->add_vertex( CalculateEdgePoint( poly->edge[1] ), f_edge2 );
-				auto const edge_v3 = mesh->add_vertex( CalculateEdgePoint( poly->edge[2] ), f_edge3 );
+				auto const edge_v1 = mesh->add_vertex( CalculateEdgePoint( poly->edge[0] ) );
+				auto const edge_v2 = mesh->add_vertex( CalculateEdgePoint( poly->edge[1] ) );
+				auto const edge_v3 = mesh->add_vertex( CalculateEdgePoint( poly->edge[2] ) );
 
 				// Texture is initialised to nothing
 				std::shared_ptr<Mesh::Data::Texture> uv1{ nullptr };

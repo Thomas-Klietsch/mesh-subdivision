@@ -126,7 +126,7 @@ namespace Mesh::Subdivision {
 						std::cout << "Error! Doo algorithm encountered a null pointer edge.\n";
 						return nullptr;
 					}
-					auto const& vertex = mesh->add_vertex( CalculateVertex( edge ), false );
+					auto const& vertex = mesh->add_vertex( CalculateVertex( edge ) );
 					// Edges are processed in reverse order, so insert at front
 					data.emplace( data.begin(), std::make_shared<Mesh::Data::Edge>( vertex ) );
 					edge = edge->twin->next;

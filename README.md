@@ -22,13 +22,14 @@ Save subdivided mesh:
 
 	Mesh::Export( "mesh-subdiv.obj", p_subdiv, Mesh::FileType::Wavefront, Mesh::VertexNormal::Weighted );
 
-##### Algorithms
+##### Overview
 
-| Algorithm | N-gon | Surface | M/T |
-| --- | --- | --- | --- |
-|Butterfly|3|Any|Yes|
-|Butterfly, tensor|3|Any|Yes|
-|Doo|3+|Closed|No|
+| Algorithm | N-gon | Surface | M/T | Optional |
+| --- | --- | --- | --- | --- |
+|Butterfly|3|Any|All|Shading|
+|Butterfly, tensor|3|Any|All|Shading|
+|CatmullClark|3+|Any|Material|Shading|
+|Doo|3+|Closed|None|None|
 
 *N-gon*:\
 Number of edges needed.\
@@ -39,17 +40,24 @@ Special case e3, process will turn mesh polygons into triangles.
 Types of surfaces.\
 Closed, all edges are connected to two (2) polygons.\
 Open, one or two polygon(s) per edge.\
-Any, same as open, supports hard/creased edges.
+Any, same as open, supports sharp/hard/creased edges.
 
 *M/T*:\
-Support of optional surface data.\
-If not supported; all material, texture, smooth shading and hard/creased edge data is lost.
+Support for material and/or texture coordinates.\
+If not supported, the data is is lost.
+
+*Optional*:\
+Shading, if polygon is smooth or flat shaded. Lost if not supported\
 
 ##### Algorithms
 
 *Butterfly scheme*:\
 Nira Dyn, David Levine, John A. Gregory (1990)\
 A butterfly subdivision scheme for surface interpolation with tension control
+
+*Catmull-Clark*:\
+E. Catmull, J Clark (1978)\
+Recursively generated B-spline surfaces on arbitrary topological meshes
 
 *Doo*:\
 D. W. H. Doo (1978)\
@@ -63,15 +71,10 @@ A subdivision algorithm for smoothing down irregularly shaped polyhedrons
 
 ##### To do
 
-More algorithms.
+More algorithms...
 
-Butterfly w matrix.
-
-Improved butterfly.
-
-*Catmull-Clark*:\
-E. Catmull, J Clark (1978)\
-Recursively generated B-spline surfaces on arbitrary topological meshes
+*Improved butterfly*:\
+???
 
 *DDS*:\
 ???
