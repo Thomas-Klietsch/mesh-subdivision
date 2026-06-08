@@ -26,6 +26,7 @@
 #include "./mesh/subdivision/butterfly.hpp"
 #include "./mesh/subdivision/butterfly_tensor.hpp"
 #include "./mesh/subdivision/catmull-clark.hpp"
+#include "./mesh/subdivision/catmull-clark-quad.hpp"
 #include "./mesh/subdivision/doo.hpp"
 
 int main(
@@ -34,11 +35,14 @@ int main(
 ) {
 	// Load mesh into half-data, with twin edge validation.
 	// Triangle polygons
-	std::unique_ptr<Mesh::HalfEdge> p_mesh
-		= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
+	// std::unique_ptr<Mesh::HalfEdge> p_mesh
+	// 	= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
 	// Quad polygons
 	// std::unique_ptr<Mesh::HalfEdge> p_mesh
 	// 	= Mesh::Import( "cube.obj", Mesh::FileType::Wavefront, true );
+	// Quad polygons and corners (vertices)
+	std::unique_ptr<Mesh::HalfEdge> p_mesh
+		= Mesh::Import( "torus.obj", Mesh::FileType::Wavefront, true );
 
 	if ( !p_mesh ) {
 		std::cout << "Failed to import half edge data.\n";
@@ -46,12 +50,7 @@ int main(
 	}
 
 	std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
-		= std::make_unique<Mesh::Subdivision::Butterfly>();
-	// Create Doo subdivision algorithm, with optional value of 0.6
-	// std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
-	// 	= std::make_unique<Mesh::Subdivision::Doo>( 0.6 );
-	// std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
-	// 	= std::make_unique<Mesh::Subdivision::CatmullClark>();
+		= std::make_unique<Mesh::Subdivision::CatmullClarkQuad>();
 
 	// Note:
 	// Not all file formats support import of smooth shading of polygons

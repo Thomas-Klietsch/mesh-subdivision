@@ -32,7 +32,7 @@ namespace Mesh::Subdivision {
 			// Check that all edges have a next and previous
 			for ( auto const& e : p_input->edge )
 				if ( e->next == nullptr || e->previous == nullptr ) {
-					std::cout << "Error! Doo algorithm can only process a closed surface mesh.\n";
+					std::cout << "Error! Catmull-Clark algorithm can only process a closed surface mesh.\n";
 					return nullptr;
 				}
 
@@ -40,7 +40,7 @@ namespace Mesh::Subdivision {
 			for ( auto const& v : p_input->vertex )
 				// 3 polygons + itself
 				if ( v.use_count() < 4 ) {
-					std::cout << "Error! Doo algorithm need vertices with at least three (3) edges.\n";
+					std::cout << "Error! Catmull-Clark algorithm need vertices with at least three (3) edges.\n";
 					return nullptr;
 				}
 
@@ -134,7 +134,7 @@ namespace Mesh::Subdivision {
 
 			sum_edge /= static_cast<std::double_t>( n );
 			sum_centre /= static_cast<std::double_t>( n );
-			// n<=3, tested at start of process()
+			// n>=3, tested at start of process()
 			return ( p * ( n - 3 ) + sum_edge * 2. + sum_centre ) / static_cast<std::double_t>( n );
 		};
 

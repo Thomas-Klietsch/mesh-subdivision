@@ -27,8 +27,9 @@ Save subdivided mesh:
 | Algorithm | N-gon | Surface | M/T | Optional |
 | --- | --- | --- | --- | --- |
 |Butterfly|3|Any|All|Shading|
-|Butterfly, tensor|3|Any|All|Shading|
+|ButterflyTensor|3|Any|All|Shading|
 |CatmullClark|3+|Any|Material|Shading|
+|CatmullClarkQuad|4|Closed|None|None|
 |Doo|3+|Closed|None|None|
 
 *N-gon*:\
@@ -51,11 +52,13 @@ Shading, if polygon is smooth or flat shaded. Lost if not supported\
 
 ##### Algorithms
 
-*Butterfly scheme*:\
+*Butterfly*:\
+*Butterfly-Tensor*:\
 Nira Dyn, David Levine, John A. Gregory (1990)\
 A butterfly subdivision scheme for surface interpolation with tension control
 
 *Catmull-Clark*:\
+*Catmull-Clark-Quad*:\
 E. Catmull, J Clark (1978)\
 Recursively generated B-spline surfaces on arbitrary topological meshes
 
