@@ -28,6 +28,8 @@
 #include "./mesh/subdivision/catmull-clark.hpp"
 #include "./mesh/subdivision/catmull-clark-quad.hpp"
 #include "./mesh/subdivision/doo.hpp"
+#include "./mesh/subdivision/doo-sabin.hpp"
+#include "./mesh/subdivision/loop.hpp"
 
 int main(
 	[[maybe_unused]] int argc,
@@ -35,14 +37,14 @@ int main(
 ) {
 	// Load mesh into half-data, with twin edge validation.
 	// Triangle polygons
-	// std::unique_ptr<Mesh::HalfEdge> p_mesh
-	// 	= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
+	std::unique_ptr<Mesh::HalfEdge> p_mesh
+		= Mesh::Import( "cube_tri.obj", Mesh::FileType::Wavefront, true );
 	// Quad polygons
 	// std::unique_ptr<Mesh::HalfEdge> p_mesh
 	// 	= Mesh::Import( "cube.obj", Mesh::FileType::Wavefront, true );
 	// Quad polygons and corners (vertices)
-	std::unique_ptr<Mesh::HalfEdge> p_mesh
-		= Mesh::Import( "torus.obj", Mesh::FileType::Wavefront, true );
+	// std::unique_ptr<Mesh::HalfEdge> p_mesh
+	// 	= Mesh::Import( "torus.obj", Mesh::FileType::Wavefront, true );
 
 	if ( !p_mesh ) {
 		std::cout << "Failed to import half edge data.\n";
@@ -50,7 +52,7 @@ int main(
 	}
 
 	std::unique_ptr<Mesh::Subdivision::Polymorphic> p_algorithm
-		= std::make_unique<Mesh::Subdivision::CatmullClarkQuad>();
+		= std::make_unique<Mesh::Subdivision::Loop>();
 
 	// Note:
 	// Not all file formats support import of smooth shading of polygons

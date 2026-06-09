@@ -29,13 +29,17 @@ Save subdivided mesh:
 |Butterfly|3|Any|All|Shading|
 |ButterflyTensor|3|Any|All|Shading|
 |CatmullClark|3+|Any|Material|Shading|
-|CatmullClarkQuad|4|Closed|None|None|
+|CatmullClarkQuad|4*|Closed|None|None|
 |Doo|3+|Closed|None|None|
+|DooSabin|3+|Closed|None|None|
+|Loop|3|Any|All|Shading|
 
 *N-gon*:\
 Number of edges needed.\
 Either a fixed value, or a minimal.\
-Special case e3, process will turn mesh polygons into triangles.
+Special cases:\
+3*, process will turn mesh polygons into triangles.\
+4*, vertices must be order 4 (e.g. have four edges).
 
 *Surface*:\
 Types of surfaces.\
@@ -66,6 +70,14 @@ Recursively generated B-spline surfaces on arbitrary topological meshes
 D. W. H. Doo (1978)\
 A subdivision algorithm for smoothing down irregularly shaped polyhedrons
 
+*Doo-Sabin*:\
+D. Doo, M. Sabin (1978)\
+Behavior of recursive division surfaces near extraordinary points
+
+*Loop*:\
+Loop, Charles Teorell (1987)\
+Smooth Subdivision Surfaces Based on Triangles
+
 ##### Dependencies
 
 - C++20
@@ -82,20 +94,12 @@ More algorithms...
 *DDS*:\
 ???
 
-*Doo-Sabin*:\
-D. Doo, M. Sabin (1978)\
-Behavior of recursive division surfaces near extraordinary points
-
 *Habib-Warren (AKA midedge)*:\
 A. Habib, J. Warren (1999)\
 Edge and vertex insertion for a class of C1 subdivision surfaces
 
 *Kobbelt*:\
 ???
-
-*Loop*:\
-Loop, Charles Teorell (1987)\
-Smooth Subdivision Surfaces Based on Triangles
 
 *Peters-Reif (AKA midedge)*:\
 J. Peters, U. Reif (1997)\
@@ -104,3 +108,7 @@ The simplest subdivision scheme for smoothing polyhedra
 *Root3*:\
 Kobbelt, Leif (2000)\
 √3-subdivision
+
+Chaikin (1974), An algorithm for high speed generation
+
+order 4
