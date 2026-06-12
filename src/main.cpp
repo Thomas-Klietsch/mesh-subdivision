@@ -95,7 +95,7 @@ int main(
 	}
 
 	// Set all polygons to smooth shading,
-	// since the Doo algorithm does not support it.
+	// since some algorithms does not support it.
 	// for ( auto& p : p_subdiv->polygon )
 	// 	p->f_smooth = true;
 

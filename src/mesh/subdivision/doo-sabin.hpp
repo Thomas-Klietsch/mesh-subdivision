@@ -1,6 +1,22 @@
+// Copyright (c) 2026 Thomas Klietsch, all rights reserved.
+//
+// Licensed under the GNU Lesser General Public License, version 3.0 or later
+//
+// This program is free software: you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation, either version 3 of
+// the License, or ( at your option ) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General
+// Public License along with this program.If not, see < https://www.gnu.org/licenses/>. 
+
 #pragma once
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
@@ -8,7 +24,6 @@
 
 #include "./../../mesh/subdivision/polymorhic.hpp"
 
-#include "./../../mathematics/constant.hpp"
 #include "./../../mesh/half-edge.hpp"
 
 namespace Mesh::Subdivision {
@@ -26,21 +41,27 @@ namespace Mesh::Subdivision {
 			std::unique_ptr<Mesh::HalfEdge> const& p_input
 		) const override {
 			if ( p_input == nullptr ) {
-				std::cout << "Error! Can not process a null pointer.\n";
+				std::cout << "Error! Doo-Sabin can not process a null pointer.\n";
 				return nullptr;
 			}
 
-			// Check that all edges have a next and twin (closed surface)
-			for ( auto const& e : p_input->edge )
-				if ( e->twin == nullptr || e->next == nullptr || e->previous == nullptr ) {
-					std::cout << "Error! Doo-Sabin algorithm can only process a closed surface mesh.\n";
-					return nullptr;
+			// Check if data can be processed
+			for ( auto const& polygon : p_input->polygon ) {
+				for ( auto const& edge : polygon->edge ) {
+					if ( edge->next == nullptr || edge->previous == nullptr ) {
+						std::cout << "Error! Doo-Sabin algorithm can only process closed loop polygons.\n";
+						return nullptr;
+					}
+					if ( edge->twin == nullptr ) {
+						std::cout << "Error! Doo-Sabin algorithm can only process a closed surface mesh.\n";
+						return nullptr;
+					}
 				}
-
+			}
 			// Check that all vertices is a "corner" (3+ polygons)
-			for ( auto const& v : p_input->vertex )
-				// 3 polygons + itself
-				if ( v.use_count() < 4 ) {
+			// 3 polygons + itself
+			for ( auto const& vertex : p_input->vertex )
+				if ( vertex.use_count() < 4 ) {
 					std::cout << "Error! Doo-Sabin algorithm need vertices with at least three (3) edges.\n";
 					return nullptr;
 				}

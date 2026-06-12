@@ -1,3 +1,20 @@
+// Copyright (c) 2026 Thomas Klietsch, all rights reserved.
+//
+// Licensed under the GNU Lesser General Public License, version 3.0 or later
+//
+// This program is free software: you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation, either version 3 of
+// the License, or ( at your option ) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General
+// Public License along with this program.If not, see < https://www.gnu.org/licenses/>. 
+
 #pragma once
 
 #include <cmath>
@@ -7,7 +24,6 @@
 
 #include "./../../mesh/subdivision/polymorhic.hpp"
 
-#include "./../../mathematics/constant.hpp"
 #include "./../../mesh/half-edge.hpp"
 
 namespace Mesh::Subdivision {
@@ -25,20 +41,22 @@ namespace Mesh::Subdivision {
 			std::unique_ptr<Mesh::HalfEdge> const& p_input
 		) const override {
 			if ( p_input == nullptr ) {
-				std::cout << "Error! Can not process a null pointer.\n";
+				std::cout << "Error! Catmull-Clark algorithm can not process a null pointer.\n";
 				return nullptr;
 			}
 
-			// Check that all edges have a next and previous
-			for ( auto const& e : p_input->edge )
-				if ( e->next == nullptr || e->previous == nullptr ) {
-					std::cout << "Error! Catmull-Clark algorithm can only process a closed surface mesh.\n";
-					return nullptr;
+			// Check if data can be processed
+			for ( auto const& polygon : p_input->polygon ) {
+				for ( auto const& edge : polygon->edge ) {
+					if ( edge->next == nullptr || edge->previous == nullptr ) {
+						std::cout << "Error! Catmull-Clark algorithm can only process closed loop polygons.\n";
+						return nullptr;
+					}
 				}
-
+			}
 			// Check that all vertices is a "corner" (3+ polygons)
+			// 3 polygons + itself
 			for ( auto const& v : p_input->vertex )
-				// 3 polygons + itself
 				if ( v.use_count() < 4 ) {
 					std::cout << "Error! Catmull-Clark algorithm need vertices with at least three (3) edges.\n";
 					return nullptr;
@@ -53,12 +71,12 @@ namespace Mesh::Subdivision {
 			// m1=(n-3)/n m2=1/n m3=2/n
 			// n: valence, number of edges
 
-			for ( auto const& p : p_input->polygon ) {
+			for ( auto const& polygon : p_input->polygon ) {
 				// (A) New face point, common point
-				Double3 const centre = p->centre();
+				Double3 const centre = polygon->centre();
 				auto const v1 = mesh->add_vertex( centre );
 
-				for ( auto const& edge : p->edge ) {
+				for ( auto const& edge : polygon->edge ) {
 					// (B) New edge point
 					Double3 const edge1 = CalculateEdgePoint( edge->previous );
 					auto const v2 = mesh->add_vertex( edge1 );
@@ -81,8 +99,8 @@ namespace Mesh::Subdivision {
 						std::make_shared<Mesh::Data::Edge>( v3, f_edge2 ),
 						std::make_shared<Mesh::Data::Edge>( v4, f_edge2 )
 						},
-						p->material_index,
-						p->f_smooth
+						polygon->material_index,
+						polygon->f_smooth
 					);
 				}
 			}

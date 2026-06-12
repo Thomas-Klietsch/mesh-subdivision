@@ -33,10 +33,10 @@ Save subdivided mesh:
 |Doo|3+|Closed|None|None|
 |DooSabin|3+|Closed|None|None|
 |Loop|3|Any|All|Shading|
+|---Root3---|3*|Any|None|None|
 
 *N-gon*:\
-Number of edges needed.\
-Either a fixed value, or a minimal.\
+Number of edges needed. Either a fixed value, or a minimal.\
 Special cases:\
 3*, process will turn mesh polygons into triangles.\
 4*, vertices must be order 4 (e.g. have four edges).
@@ -78,6 +78,10 @@ Behavior of recursive division surfaces near extraordinary points
 Loop, Charles Teorell (1987)\
 Smooth Subdivision Surfaces Based on Triangles
 
+*Root3*:\
+Kobbelt, Leif (2000)\
+√3-subdivision
+
 ##### Dependencies
 
 - C++20
@@ -105,10 +109,4 @@ Edge and vertex insertion for a class of C1 subdivision surfaces
 J. Peters, U. Reif (1997)\
 The simplest subdivision scheme for smoothing polyhedra
 
-*Root3*:\
-Kobbelt, Leif (2000)\
-√3-subdivision
-
 Chaikin (1974), An algorithm for high speed generation
-
-order 4

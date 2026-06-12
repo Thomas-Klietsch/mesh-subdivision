@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <memory>
@@ -25,7 +24,6 @@
 
 #include "./../../mesh/subdivision/polymorhic.hpp"
 
-#include "./../../mathematics/constant.hpp"
 #include "./../../mesh/half-edge.hpp"
 
 namespace Mesh::Subdivision {
@@ -54,21 +52,27 @@ namespace Mesh::Subdivision {
 			std::unique_ptr<Mesh::HalfEdge> const& p_input
 		) const override {
 			if ( p_input == nullptr ) {
-				std::cout << "Error! Can not process a null pointer.\n";
+				std::cout << "Error! Doo algorithm can not process a null pointer.\n";
 				return nullptr;
 			}
 
-			// Check that all edges have a next and twin (closed surface)
-			for ( auto const& e : p_input->edge )
-				if ( e->twin == nullptr || e->next == nullptr ) {
-					std::cout << "Error! Doo algorithm can only process a closed surface mesh.\n";
-					return nullptr;
+			// Check if data can be processed
+			for ( auto const& polygon : p_input->polygon ) {
+				for ( auto const& edge : polygon->edge ) {
+					if ( edge->next == nullptr || edge->previous == nullptr ) {
+						std::cout << "Error! Doo algorithm can only process closed loop polygons.\n";
+						return nullptr;
+					}
+					if ( edge->twin == nullptr ) {
+						std::cout << "Error! Doo algorithm can only process a closed surface mesh.\n";
+						return nullptr;
+					}
 				}
-
+			}
 			// Check that all vertices is a "corner" (3+ polygons)
-			for ( auto const& v : p_input->vertex )
-				// 3 polygons + itself
-				if ( v.use_count() < 4 ) {
+			// 3 polygons + itself
+			for ( auto const& vertex : p_input->vertex )
+				if ( vertex.use_count() < 4 ) {
 					std::cout << "Error! Doo algorithm need vertices with at least three (3) edges.\n";
 					return nullptr;
 				}
@@ -79,9 +83,9 @@ namespace Mesh::Subdivision {
 			// Scheme uses three (3) different polygon constructions
 
 			// From polygons (Type F)
-			for ( auto const& poly : p_input->polygon ) {
+			for ( auto const& polygon : p_input->polygon ) {
 				std::vector<std::shared_ptr<Mesh::Data::Edge>> data;
-				for ( auto const& edge : poly->edge ) {
+				for ( auto const& edge : polygon->edge ) {
 					auto const vertex = mesh->add_vertex( CalculateVertex( edge ) );
 					data.emplace_back( std::make_shared<Mesh::Data::Edge>( vertex ) );
 				}
@@ -119,7 +123,7 @@ namespace Mesh::Subdivision {
 				for ( auto const& e : p_input->edge )
 					if ( e->vertex == vertex )
 						edge = e;
-				
+
 				for ( std::size_t i{ 0 }; i < n; ++i ) {
 					// Should never happen, but check anyway
 					if ( edge == nullptr ) {
@@ -146,12 +150,12 @@ namespace Mesh::Subdivision {
 
 		// All new vertices in this scheme is calculated the same way
 		Double3 CalculateVertex(
-			std::shared_ptr<Mesh::Data::Edge> const& p_edge
+			std::shared_ptr<Mesh::Data::Edge> const& edge
 		) const {
 			// Polygon centre
-			Double3 const centre = p_edge->polygon->centre();
+			Double3 const centre = edge->polygon->centre();
 			// Edge vertex
-			Double3 const v1 = p_edge->vertex->location;
+			Double3 const v1 = edge->vertex->location;
 			// New vertex
 			return v1 + ( centre - v1 ) * scalar;
 		};

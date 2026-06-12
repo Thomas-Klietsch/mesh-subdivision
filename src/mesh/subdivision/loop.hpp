@@ -1,3 +1,20 @@
+// Copyright (c) 2026 Thomas Klietsch, all rights reserved.
+//
+// Licensed under the GNU Lesser General Public License, version 3.0 or later
+//
+// This program is free software: you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation, either version 3 of
+// the License, or ( at your option ) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General
+// Public License along with this program.If not, see < https://www.gnu.org/licenses/>. 
+
 #pragma once
 
 #include <cmath>
@@ -43,49 +60,46 @@ namespace Mesh::Subdivision {
 			std::unique_ptr<Mesh::HalfEdge> const& p_input
 		) const override {
 			if ( p_input == nullptr ) {
-				std::cout << "Error! Can not process a null pointer.\n";
+				std::cout << "Error! Loop algorithm can not process a null pointer.\n";
 				return nullptr;
 			}
 
-			// Check that all edges have a next and previous
-			for ( auto const& e : p_input->edge )
-				if ( e->next == nullptr || e->previous == nullptr ) {
-					std::cout << "Error! Loop algorithm can only process a closed surface mesh.\n";
+			// Check if data can be processed
+			for ( auto const& polygon : p_input->polygon ) {
+				if ( polygon->edge.size() != 3 ) {
+					std::cout << "Error! Loop algorithm can only process a triangle mesh.\n";
 					return nullptr;
 				}
-
-			// Check that all polygons are triangles
-			for ( auto const& p : p_input->polygon )
-				if ( p->edge.size() != 3 ) {
-					std::cout << "Error! Loop algorithm only support polygons with three (3) edges.\n";
-					return nullptr;
+				for ( auto const& edge : polygon->edge ) {
+					if ( edge->next == nullptr || edge->previous == nullptr ) {
+						std::cout << "Error! Loop algorithm can only process closed loop polygons.\n";
+						return nullptr;
+					}
+					// Check that all vertices orders are covered.
+					// Highly unlikely to fail.
+					if ( edge->vertex.use_count() > 32 ) {
+						std::cout << "Error! Loop algorithm vertex order is limited to 32.\n";
+						return nullptr;
+					}
 				}
-
-			// Check that all vertices orders are covered.
-			// Highly unlikely to fail.
-			for ( auto const& v : p_input->vertex )
-				// 32 polygons/edges + itself
-				if ( v.use_count() > 32 ) {
-					std::cout << "Error! Loop algorithm vertex order is limited to 32.\n";
-					return nullptr;
-				}
+			}
 
 			// Subdivided mesh
 			std::unique_ptr<Mesh::HalfEdge> mesh = std::make_unique<Mesh::HalfEdge>();
 
-			for ( auto const& p : p_input->polygon ) {
+			for ( auto const& polygon : p_input->polygon ) {
 				// Current polygon vertices
-				auto const v1 = mesh->add_vertex( CalculateVertex( p->edge[0]->vertex, p_input ) );
-				auto const v2 = mesh->add_vertex( CalculateVertex( p->edge[1]->vertex, p_input ) );
-				auto const v3 = mesh->add_vertex( CalculateVertex( p->edge[2]->vertex, p_input ) );
+				auto const v1 = mesh->add_vertex( CalculateVertex( polygon->edge[0]->vertex, p_input ) );
+				auto const v2 = mesh->add_vertex( CalculateVertex( polygon->edge[1]->vertex, p_input ) );
+				auto const v3 = mesh->add_vertex( CalculateVertex( polygon->edge[2]->vertex, p_input ) );
 				// Edge boundary state
-				bool const f_edge1 = p->edge[0]->is_boundary(); // v1->v2
-				bool const f_edge2 = p->edge[1]->is_boundary();
-				bool const f_edge3 = p->edge[2]->is_boundary();
+				bool const f_edge1 = polygon->edge[0]->is_boundary(); // v1->v2
+				bool const f_edge2 = polygon->edge[1]->is_boundary();
+				bool const f_edge3 = polygon->edge[2]->is_boundary();
 				// Generate new edge vertices
-				auto const edge_v1 = mesh->add_vertex( CalculateEdgePoint( p->edge[0] ) );
-				auto const edge_v2 = mesh->add_vertex( CalculateEdgePoint( p->edge[1] ) );
-				auto const edge_v3 = mesh->add_vertex( CalculateEdgePoint( p->edge[2] ) );
+				auto const edge_v1 = mesh->add_vertex( CalculateEdgePoint( polygon->edge[0] ) );
+				auto const edge_v2 = mesh->add_vertex( CalculateEdgePoint( polygon->edge[1] ) );
+				auto const edge_v3 = mesh->add_vertex( CalculateEdgePoint( polygon->edge[2] ) );
 
 				// Texture is initialised to nothing
 				std::shared_ptr<Mesh::Data::Texture> uv1{ nullptr };
@@ -96,11 +110,11 @@ namespace Mesh::Subdivision {
 				std::shared_ptr<Mesh::Data::Texture> edge_uv3{ nullptr };
 
 				// If texture is define for original polygon
-				if ( p->is_textured() ) {
+				if ( polygon->is_textured() ) {
 					// Get original texture data
-					uv1 = mesh->add_texture( p->edge[0]->texture->location );
-					uv2 = mesh->add_texture( p->edge[1]->texture->location );
-					uv3 = mesh->add_texture( p->edge[2]->texture->location );
+					uv1 = mesh->add_texture( polygon->edge[0]->texture->location );
+					uv2 = mesh->add_texture( polygon->edge[1]->texture->location );
+					uv3 = mesh->add_texture( polygon->edge[2]->texture->location );
 					// Calculate edge texture data
 					edge_uv1 = mesh->add_texture( uv1->location + ( uv2->location - uv1->location ) * .5 );
 					edge_uv2 = mesh->add_texture( uv2->location + ( uv3->location - uv2->location ) * .5 );
@@ -114,26 +128,26 @@ namespace Mesh::Subdivision {
 					std::make_shared<Mesh::Data::Edge>( v1, f_edge1, uv1 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v1, f_edge1 & f_edge3, edge_uv1 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v3, f_edge3, edge_uv3 ) },
-					p->material_index,
-					p->f_smooth );
+					polygon->material_index,
+					polygon->f_smooth );
 				mesh->add_polygon( {
 					std::make_shared<Mesh::Data::Edge>( v2, f_edge2, uv2 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v2, f_edge2 & f_edge1, edge_uv2 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v1, f_edge1, edge_uv1 ) },
-					p->material_index,
-					p->f_smooth );
+					polygon->material_index,
+					polygon->f_smooth );
 				mesh->add_polygon( {
 					std::make_shared<Mesh::Data::Edge>( v3, f_edge3, uv3 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v3, f_edge3 & f_edge2, edge_uv3 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v2, f_edge2, edge_uv2 ) },
-					p->material_index,
-					p->f_smooth );
+					polygon->material_index,
+					polygon->f_smooth );
 				mesh->add_polygon( {
 					std::make_shared<Mesh::Data::Edge>( edge_v1, f_edge1 & f_edge2, edge_uv1 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v2, f_edge2 & f_edge3, edge_uv2 ),
 					std::make_shared<Mesh::Data::Edge>( edge_v3, f_edge3 & f_edge1, edge_uv3 ) },
-					p->material_index,
-					p->f_smooth );
+					polygon->material_index,
+					polygon->f_smooth );
 			}
 
 			// Finish mesh data
@@ -146,9 +160,9 @@ namespace Mesh::Subdivision {
 		// Return location for vertex opposite to edge.
 		// Only valid for triangles.
 		Double3 Corner(
-			std::shared_ptr<Mesh::Data::Edge> const& p_edge
+			std::shared_ptr<Mesh::Data::Edge> const& edge
 		) const {
-			return p_edge->previous->vertex->location;
+			return edge->previous->vertex->location;
 			// Alternative:
 			// return p_edge->next->next->vertex->location;
 		};
@@ -165,7 +179,7 @@ namespace Mesh::Subdivision {
 
 			// TODO better algorithm
 			// Find all edges starting from vertex
-			for ( auto edge : p_input->edge )
+			for ( auto const& edge : p_input->edge )
 				if ( vertex == edge->vertex ) {
 					// If any edge is a boundary, the vertex can not be moved
 					if ( edge->is_boundary() )
