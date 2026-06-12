@@ -33,7 +33,7 @@ Save subdivided mesh:
 |Doo|3+|Closed|None|None|
 |DooSabin|3+|Closed|None|None|
 |Loop|3|Any|All|Shading|
-|---Root3---|3*|Any|None|None|
+|Root3|3*|Any|None|None|
 
 *N-gon*:\
 Number of edges needed. Either a fixed value, or a minimal.\
